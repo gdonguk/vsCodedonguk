@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ID</title>
+</head>
+<body>
+    <button onclick="fn_changeSize()">텍스트 변경</button>
+    <button onclick="fn_changeSizeDown()">텍스트 작아지게</button>
+    <p id ="text1">이 텍스트의 크기를 변경하세요!!!</p>
+    <button onclick="fn_visibility()">숨기기/보이기</button>
+    <div id = "box">이 내용을 숨기거나 보이게 하세요!!!</div>
+    
+    <img id="slider" src ="/ht/media/슬덩.jpeg" width="200px" height="240px" alt="">
+    <button onclick="fn_next()">다음 이미지</button>
+
+    <script>
+        let size = 20;
+        function fn_changeSize(){
+            size ++;
+            let text = document.getElementById('text1');
+            text.style.fontSize = size + 'px';            
+        }
+        function fn_changeSizeDown(){
+            size --;
+            let text2  =document.getElementById('text1');
+            text2.style.fontSize = size + 'px';
+        }
+
+        function fn_visibility(){
+            let box = document.querySelector('#box')
+                                   // === 값도 같고 타입도 같을때 // 같으면 block // 다르면 none
+            box.style.display = box.style.display === "none" ? "block" : "none";
+        }
+        let images = ['/ht/media/존윅.jpeg', '/ht/media/드림.jpeg','/ht/media/마리오.jpeg']
+        let currentIdx = 0;
+        function fn_next(){
+            let slider = document.getElementById('slider');
+            currentIdx = (currentIdx +1) % images.length;
+            console.log(currentIdx);
+            slider.src = images[currentIdx];
+        }
+
+    </script>
+    
+</body>
+</html>
