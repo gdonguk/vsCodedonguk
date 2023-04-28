@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<!-- saved from url=(0039)https://cujgame.netlify.app/horseracing -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>경마게임</title>
+    <style>
+        #container_inner{
+            width: 2400px;
+            height: 440px;
+            border: 2px solid black;
+        }
+
+        #container_outer{
+            width: 2900px;
+            height: 440px;
+        }
+
+        .horse{
+            width: 80px;
+            height: 70px;
+            display: inline-block;
+        }
+
+        #lane{
+            width: 2400px;
+            height: 99px;
+            border-bottom: 3px solid green;
+            display: block;
+        }
+
+        #horse_box{
+            width: fit-content;
+            height: inherit;
+            display: table-cell;
+            position: relative;
+            vertical-align: bottom;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container_outer">
+        <div id="container_inner">
+            <div id="lane">
+                <div id="horse_box" name="horse" style="left: 0px; transform: scaleX(1); filter: brightness(1);">
+                    <img class="horse" src="./경마게임_files/horse_six.gif" alt="horse_six">
+                </div>
+            </div>
+    
+            <div id="lane">
+                <div id="horse_box" name="horse" style="left: 0px; transform: scaleX(1); filter: brightness(1);">
+                    <img class="horse" src="./경마게임_files/horse_six.gif" alt="horse_six">
+                </div>
+            </div>
+    
+            <div id="lane">
+                <div id="horse_box" name="horse" style="left: 0px; transform: scaleX(1); filter: brightness(1);">
+                    <img class="horse" src="./경마게임_files/horse_six.gif" alt="horse_six">
+                </div>
+            </div>
+   
+            <div id="lane">
+                <div id="horse_box" name="horse" style="left: 0px; transform: scaleX(1); filter: brightness(1);">
+                    <img class="horse" src="./경마게임_files/horse_six.gif" alt="horse_six">
+                </div>
+            </div>
+    
+        </div> <!--End of container_inner-->
+
+        <div style="margin-top: 30px; display: flex">
+            <table id="teamTable" style="display: inline-block;">
+                <tbody><tr>
+                    <th>팀 (포인트)</th>
+                    <th>배팅할 말의 번호</th>
+                    <th>배팅할 금액</th>
+                </tr>
+                <tr>
+                    <td name="teamName">1팀 (1000)</td>
+                    <td>
+                        <input type="text" name="betHorse">
+                    </td>
+                    <td>
+                        <input type="text" name="teamBet">
+                    </td>
+                </tr>
+                <tr>
+                    <td name="teamName">2팀 (1000)</td>
+                    <td>
+                        <input type="text" name="betHorse">
+                    </td>
+                    <td>
+                        <input type="text" name="teamBet">
+                    </td>
+                </tr>
+                <tr>
+                    <td name="teamName">3팀 (1000)</td>
+                    <td>
+                        <input type="text" name="betHorse">
+                    </td>
+                    <td>
+                        <input type="text" name="teamBet">
+                    </td>
+                </tr>
+                <tr>
+                    <td name="teamName">4팀 (1000)</td>
+                    <td>
+                        <input type="text" name="betHorse">
+                    </td>
+                    <td>
+                        <input type="text" name="teamBet">
+                    </td>
+                </tr>
+            </tbody></table>
+
+            <div id="teamButton" style="display: inline-block; top: 50px;">
+                <input type="button" value="팀추가" onclick="addTeam()">
+                <input type="button" value="팀삭제" onclick="delTeam()">
+            </div>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <button id="button_start" onclick="startRace()" style="width: 200px; height: 30px;">1번째 판 시작!!</button>
+
+            &nbsp; *총 5판으로 구성되어 있습니다.
+        </div>
+    </div>  <!--End of container_outer-->
+
+
+
+    <script>
+        createTeam();
+        
+        
+        // 팀 데이터 생성(로컬 스토리지)
+        function createTeam(){
+            const v_teams = document.getElementsByName("teamName");
+            
+            v_tblName = "UserDB";
+            v_datas = []; // 전체 json을 담을 빈 배열 생성
+
+            for(let i = 0; i < v_teams.length; i++){
+                var v_user = {};
+                v_user.name = (i+1) + "팀"; // 이름
+                v_user.point = 1000;
+                v_user.horse = 0; // 베팅한 말 번호
+                v_datas.push(v_user);
+            }
+            
+            localStorage.setItem(v_tblName, JSON.stringify(v_datas));
+        }
+
+
+        function addTeam(){
+            let v_teamTable = document.getElementById("teamTable");
+
+            v_teamTable.innerHTML += "<tr><td name='teamName'></td><td><input type='text' name='betHorse'></td><td><input type='text' name='teamBet'></td></tr>";
+            createTeam();
+            initTeamState();
+        }
+
+        function delTeam(){
+            const v_teams = document.getElementsByName("teamName");
+
+            if(v_teams.length == 1){
+                return;
+            }
+
+            v_teams[v_teams.length-1].parentNode.remove();
+            createTeam();
+            initTeamState();
+        }
+
+
+        // 말들 목록 가져옴
+        var horse_list = document.getElementsByName("horse");
+
+        // 판수
+        var stage = 0;
+
+        // 판마다 말들 위치나 상태 초기화  ==============================================
+        function initHorsePosition(){
+            isCursed = false;
+            horse_list.forEach(function(horse){
+                horse.style.left = "0px";
+                horse.style.transform = "rotate(0deg)";
+                horse.style.webkitFilter = "brightness(1.0)";
+                horse.style.transform= "scaleX(1)";
+            })
+            scrollTo(0, 0);
+            initTeamState();
+            cursedNum = -1;
+            secondCursedNum = -1;
+            stage++;
+
+            var button = document.getElementById("button_start");
+            button.innerHTML = stage + "번째 판 시작!!";
+
+            var betHorseList = document.getElementsByName("betHorse");
+            betHorseList[0].focus();
+
+            if(stage > 5){
+                setTimeout(finalResult, 1000);
+            }
+        }
+        initHorsePosition();
+
+        // 최종 승자를 알려준다
+        function finalResult(){
+            var v_userDatas = JSON.parse(localStorage.getItem(v_tblName));
+
+            var maxVal = 0;
+            for(var i = 0; i < v_userDatas.length; i++){
+                if(v_userDatas[i].point > maxVal){
+                    maxVal = v_userDatas[i].point;
+                }
+            }
+
+            for(var i = 0; i < v_userDatas.length; i++){
+                if(v_userDatas[i].point == maxVal){
+                    alert(v_userDatas[i].name + "우승 !!!");
+                }
+            }
+        }
+
+        // 팀들의 상태 UI에 반영
+        function initTeamState(){
+            var v_userDatas = JSON.parse(localStorage.getItem(v_tblName));
+            var nameList = document.getElementsByName("teamName");
+            var betList = document.getElementsByName("teamBet");
+            var betHorseList = document.getElementsByName("betHorse");
+
+            for(var i = 0; i < v_userDatas.length; i++){
+                nameList[i].innerHTML = v_userDatas[i].name + " (" + v_userDatas[i].point + ")";
+                betList[i].value = "";
+                betHorseList[i].value = "";
+            }
+        }
+
+        // 회전 시키는 이벤트 
+        var v_gak = 0; // 초기 각도 값
+        var v_gakInc = 30; // 증가값
+
+        function f_rotate(){
+            var horse = horse_list[cursedNum];
+            v_gak = (v_gak + v_gakInc) % 360; // 360 을 넘어가면 다시 1이 됨
+            horse.style.transform = "rotate(" + v_gak + "deg)";
+
+            setTimeout(f_rotate, 30);
+        }
+
+        function f_rotate2(){
+            var horse = horse_list[secondCursedNum];
+            v_gak = (v_gak + v_gakInc) % 360; // 360 을 넘어가면 다시 1이 됨
+            horse.style.transform = "rotate(" + v_gak + "deg)";
+
+            setTimeout(f_rotate2, 30);
+        }
+
+        // 부스터 이벤트
+        function f_booster(){
+            var horse = horse_list[cursedNum];
+            horse.style.left = parseInt(horse.style.left) + 20 + "px";
+
+            if(parseInt(horse.style.left) >= 2400){
+                f_result(cursedNum+1);
+                if(confirm((cursedNum+1) + "번 말 우승!!")) {
+                    initHorsePosition();
+                }else{
+                    initHorsePosition();
+                }
+
+                f_stop();
+                return;
+            }
+
+            setTimeout(f_booster, 30);
+        }
+
+        // 뒤로가기
+        function f_goBack(){
+            var horse = horse_list[cursedNum];
+            
+            if(stage == 5){
+                if(parseInt(horse.style.left) < 300){
+                    horse.style.transform= "scaleX(1)";
+                    horse.style.webkitFilter = "brightness(2.0)";
+                    f_booster();
+                }else{
+                    horse.style.left = parseInt(horse.style.left) - 10 + "px";
+                    setTimeout(f_goBack, 30);
+                }
+            }else{
+                horse.style.left = parseInt(horse.style.left) - 10 + "px";
+                setTimeout(f_goBack, 30);
+            }
+        }
+
+        // 레이스 결과
+        function f_result(num){
+            var v_userDatas = JSON.parse(localStorage.getItem(v_tblName));
+            var nameList = document.getElementsByName("teamName");
+            var betList = document.getElementsByName("teamBet");
+
+            for(var i = 0; i < v_userDatas.length; i++){
+                if(v_userDatas[i].horse == num){
+                    // 배팅금액의 3배 증가
+                    v_userDatas[i].point += parseInt(betList[i].value)*2;
+                }else{
+                    // 배팅금액을 잃음
+                    v_userDatas[i].point -= parseInt(betList[i].value);
+                }
+            }
+            // 매판 200 포인트씩 줌
+            for(var i = 0; i < v_userDatas.length; i++){
+                v_userDatas[i].point += 200;
+            }
+            localStorage.setItem(v_tblName, JSON.stringify(v_userDatas));
+        }
+
+        // 특정 이벤트가 실행되면 isCursed가 true가 되어 특정 이벤트가 다시 발동되지 않도록 한다.
+        var isCursed = false;
+        // 특정 이벤트가 발생한 horse의 인덱스를 전역 변수로 따로 뺌
+        var cursedNum = -1;
+        var secondCursedNum = -1;
+
+        // 레이스 시작
+        function startRace(){
+            let v_teamButton = document.getElementById("teamButton");
+            if(v_teamButton){
+                teamButton.remove();
+            }
+
+            var v_userDatas = JSON.parse(localStorage.getItem(v_tblName));
+            var betHorseList = document.getElementsByName("betHorse");
+            
+            for(var i = 0; i < v_userDatas.length; i++){
+                v_userDatas[i].horse = betHorseList[i].value;
+            }
+            localStorage.setItem(v_tblName, JSON.stringify(v_userDatas));
+
+            racing();
+        }
+
+        // 레이스 중
+        function racing(){
+
+            var avg = 0
+            for(var i = 0; i < horse_list.length; i++){
+                if(i == cursedNum || i == secondCursedNum){
+                    continue;
+                }
+
+                var horse = horse_list[i];
+                if(avg < parseInt(horse.style.left)){
+                    avg = parseInt(horse.style.left);
+                }
+
+                if(parseInt(horse.style.left) >= 2400){
+                    f_result(i+1);
+                    if(confirm((i+1) + "번 말 우승!!")) {
+                        initHorsePosition();
+                    }else{
+                        initHorsePosition();
+                    }
+
+                    f_stop();
+                    return;
+                }
+
+                if(!isCursed){
+                    if(stage == 2){
+                        // 1등 말 제자리 회전
+                        if(parseInt(horse.style.left) > 2000){
+                            cursedNum = i;
+                            isCursed = !isCursed;
+                            f_rotate();
+                        }
+                    }else if(stage == 3){
+                        // 꼴등 말 부스터
+                        var countL = 0;
+                        for(var j = 0; j < horse_list.length; j++){
+                            if(parseInt(horse_list[j].style.left) >= 2000){
+                                countL++;
+                            }
+                        }
+
+                        if(countL == 3){
+                            if(parseInt(horse.style.left) < 2000){
+                                cursedNum = i;
+                                isCursed = !isCursed;
+                                horse.style.webkitFilter = "brightness(2.0)";
+                                f_booster();
+                            }
+                        }
+                    }else if(stage == 4){
+                        // 1등 뒤로 가기
+                        if(parseInt(horse.style.left) > 2000){
+                            cursedNum = i;
+                            isCursed = !isCursed;
+                            horse.style.transform= "scaleX(-1)";
+                            f_goBack();
+                        }
+                    }else if(stage >= 5){
+                        // 1등 뒤로 갔다가 마지막에 부스터로 달려옴
+                        if(parseInt(horse.style.left) > 1200){
+                            cursedNum = i;
+                            isCursed = !isCursed;
+                            horse.style.transform= "scaleX(-1)";
+                            f_goBack();
+                        }
+                    }
+
+                }
+
+                if(stage >= 5 && secondCursedNum == -1){
+                    if(parseInt(horse.style.left) > 1600){
+                        secondCursedNum = i;
+                        f_rotate2();
+                    }
+                }
+
+
+                horse.style.left = parseInt(horse.style.left) + Math.floor(Math.random()*10) + "px";
+            }
+
+            // 1등 말 위치로 스크롤바 이동
+            scrollTo(avg-400, 0);
+            
+
+            v_timer = setTimeout(racing, 30);
+        }
+
+
+
+
+        function f_stop(){
+            clearTimeout(v_timer); 
+        }
+
+
+    </script>
+
+
+</body></html>

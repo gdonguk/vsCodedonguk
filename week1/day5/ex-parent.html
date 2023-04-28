@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="div1">1
+        <div id="div2">2
+             <div id="div3">3
+                <div id="div4">4</div>
+             </div>
+        </div>
+    </div>
+    <script>
+        window.onload = function (){
+            let divs = document.getElementById('div3');
+            divs.onclick = function(e){
+                    console.log("parent",e.target.parentElement);
+                    console.log("parent.parent",e.target.parentElement.parentElement);
+                    console.log("child", e.target.children);
+                };
+            // for(let i = 0 ; i < divs.length; i++){
+            //     console.log(divs[i]);
+            //     divs[i].onclick = function(e){
+            //         console.log("parent",e.target.parentElement);
+            //         console.log("parent.parent",e.target.parentElement.parentElement);
+            //         console.log("child", e.target.children);
+            //     };
+            // }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body onload="drawBall()">
+    <canvas id="myCanvas" style="background-color: beige;"
+    width="500px" height="500px"></canvas>
+    <script>
+        let canvas = document.getElementById('myCanvas');
+        let context = canvas.getContext('2d');
+        let startX = 50;
+        let startY = 490;
+        function drawBall(){
+            context.beginPath();
+            context.arc(startX, startY, 10, 0, 2.0 * Math.PI, true );
+            context.fillStyle='red';
+            context.fill();
+        }
+        function draw(){
+            context.clearRect(0, 0, 500, 500);
+            drawBall();
+        }
+        function step(){
+            startY -= 10;
+            draw();
+        }
+        document.addEventListener('keydown',function(e){
+            console.log(e);
+            if(e.code =='Space'){
+                setInterval(step,500);
+            }
+        });
+    </script>
+</body>
+</html>

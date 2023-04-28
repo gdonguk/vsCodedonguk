@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<style>
+		
+	</style>
+<meta charset = "UTF-8">
+<title> 가위바위보 </title>
+<script>
+    function reGame (){
+		location.reload();
+	}
+	document.write("<h1>컴퓨터 가위, 바위, 보 맞추기</h1>");
+
+	var game = prompt("가위, 바위, 보 중 선택하세요?", "가위");
+	var gameNum;
+	switch(game) {
+		case "가위": gameNum = 1;
+		break;
+		case "바위": gameNum = 2;
+		break;
+		case "보": gameNum = 3;
+		break;
+		default: alert("잘못 작성하셨습니다.");
+		location.reload();
+	}
+	var com = Math.ceil( Math.random() * 3 );
+	// document.write("<img src=\"images/math_img_" + com + ".jpg\">");
+	document.write("<div><span><img src='images/math_com_" + com + ".jpg'>com</span>" 
+	             +"<span style='font-size : 100px;'>vs</span>"
+				 +"<span><img src='images/math_user_" + gameNum + ".jpg'>user</span><div>");
+
+	if(gameNum == com) {
+		document.write("<img onclick='reGame()' src='images/game_3.jpg'>");
+	} else if ((gameNum == 1 && com == 3)
+	          ||(gameNum == 2 && com == 1) 
+			  ||(gameNum == 3 && com == 2)){
+				document.write("<img src='images/game_1.jpg'>");
+		// document.write("<img src=\"images/game_2.jpg\">");
+	} else if ((gameNum == 1 && com == 2)
+	         ||(gameNum == 2 && com == 3) 
+			 ||(gameNum == 3 && com == 1)){
+				document.write("<div><img src='images/game_2.jpg'></div>");
+	}
+
+
+</script>
+</head>
+<body>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/nameList.css">
+</head>
+
+<body>
+    <div id="container">
+        <h1>참가 신청서</h1>
+        <form action="" onsubmit="return false">
+            <input type="text" id="userName" placeholder="이름을 입력하세요" autocomplete="off" required onkeyup="fn_enter(event)">
+            <button type="button" onclick="fn_register()">신청</button>
+        </form>
+        <hr>
+        <div id="nameList"></div>
+    </div>
+    <script>
+        function fn_register() {
+            let userName = document.getElementById('userName');
+            let newP = document.createElement('p');
+            let newText = document.createTextNode(userName.value);
+            userName.value ="";
+            newP.appendChild(newText);
+            // x 버튼 생성(삭제)
+            let delBtn = document.createElement('span');
+            delBtn.innerHTML = 'X'
+            delBtn.setAttribute('class', 'del'); // class 속성 넣기
+            delBtn.addEventListener("click", function(){
+                // 현재(this)노드의 부모 노드의 부모 노드를 찾아 현재 노드의 부모 노드(p노드)삭제 
+                this.parentNode.parentNode.removeChild(this.parentNode);
+            });
+            newP.appendChild(delBtn);
+            let nameList = document.getElementById('nameList');
+            // 요소의 첫번째에 적용 
+            nameList.insertBefore(newP, nameList.childNodes[0]);
+           }
+           function fn_enter(e){
+            if(e.keyCode == 13){
+                fn_register();
+            }
+        }
+    </script>
+</body>
+
+</html>
